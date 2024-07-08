@@ -1,0 +1,27 @@
+.input-area {
+    display: flex;
+    margin-top: 20px;
+  }
+  
+  .input-area input {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+  }
+  
+  .input-area button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+  }
+  
+  .input-area button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
