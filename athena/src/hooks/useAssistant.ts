@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { AssistantContext } from '../contexts/AssistantContext';
 import { Message } from '../types';
-import { sendMessageToAI } from '../services/aiService'; // You'll need to create this service
+import { sendMessageToAI, loadAssistantConfig } from '../services/aiService';
 
 export const useAssistant = () => {
   const context = useContext(AssistantContext);
@@ -44,15 +44,36 @@ export const useAssistant = () => {
     }
   };
 
+  const loadAssistant = async (assistantId: string): Promise<void> => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+
+      const assistantConfig = await loadAssistantConfig(assistantId);
+      dispatch({ type: 'SET_ASSISTANT_CONFIG', payload: assistantConfig });
+
+      // You might want to load previous messages here as well
+      // const previousMessages = await loadPreviousMessages(assistantId);
+      // dispatch({ type: 'SET_MESSAGES', payload: previousMessages });
+
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load assistant configuration' });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
   const clearConversation = () => {
     dispatch({ type: 'CLEAR_MESSAGES' });
   };
 
   return {
     messages: state.messages,
+    assistantConfig: state.assistantConfig,
     isLoading: state.isLoading,
     error: state.error,
     sendMessage,
+    loadAssistant,
     clearConversation,
   };
 };

@@ -1,4 +1,5 @@
-import './ResponseDisplay.css';
+// src/components/ResponseDisplay.tsx
+
 import React from 'react';
 
 interface ResponseDisplayProps {

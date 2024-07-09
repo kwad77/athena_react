@@ -1,4 +1,5 @@
-import './InputArea.css';
+// src/components/InputArea.tsx
+
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 
 interface InputAreaProps {
