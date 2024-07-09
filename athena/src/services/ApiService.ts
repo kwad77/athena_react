@@ -12,6 +12,7 @@ class ApiService {
         'Content-Type': 'application/json',
       },
     });
+    console.log('API base URL:', this.api.defaults.baseURL);
 
     this.api.interceptors.request.use(
       (config) => {
@@ -40,11 +41,26 @@ class ApiService {
 
   // Assistant-related API calls
 
-  async getAssistants(): Promise<AssistantModel[]> {
+async getAssistants(): Promise<AssistantModel[]> {
+  console.log('Fetching assistants from:', this.api.defaults.baseURL + '/assistants');
+  try {
     const response: AxiosResponse<AssistantModel[]> = await this.api.get('/assistants');
+    console.log('Assistants response:', response.data);
     return response.data.map(assistant => AssistantModel.fromJSON(assistant));
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching assistants:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config
+      });
+    } else {
+      console.error('Unknown error fetching assistants:', error);
+    }
+    throw error;
   }
-
+}
   async createAssistant(assistant: AssistantModel): Promise<AssistantModel> {
     const response: AxiosResponse<AssistantModel> = await this.api.post('/assistants', assistant.toJSON());
     return AssistantModel.fromJSON(response.data);

@@ -6,16 +6,31 @@ import { getAssistants, getAssistantById } from '../services/assistantService';
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  const assistants = getAssistants();
-  res.json(assistants);
+  console.log('GET request received for /api/assistants');
+  try {
+    const assistants = getAssistants();
+    console.log('Assistants retrieved:', assistants);
+    res.json(assistants);
+  } catch (error) {
+    console.error('Error getting assistants:', error);
+    res.status(500).json({ error: 'Failed to retrieve assistants' });
+  }
 });
 
 router.get('/:id', (req, res) => {
-  const assistant = getAssistantById(req.params.id);
-  if (assistant) {
-    res.json(assistant);
-  } else {
-    res.status(404).json({ error: 'Assistant not found' });
+  console.log(`GET request received for /api/assistants/${req.params.id}`);
+  try {
+    const assistant = getAssistantById(req.params.id);
+    if (assistant) {
+      console.log('Assistant found:', assistant);
+      res.json(assistant);
+    } else {
+      console.log('Assistant not found');
+      res.status(404).json({ error: 'Assistant not found' });
+    }
+  } catch (error) {
+    console.error('Error getting assistant:', error);
+    res.status(500).json({ error: 'Failed to retrieve assistant' });
   }
 });
 

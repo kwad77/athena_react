@@ -8,6 +8,17 @@ export interface Message {
   conversationId: string;
 }
 
+export interface Assistant {
+  id: string;
+  name: string;
+  description: string;
+  capabilities: Capability[];
+  config: AssistantConfig;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface AssistantInfo {
     id: string;
     name: string;
