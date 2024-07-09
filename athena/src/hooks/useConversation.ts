@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Message } from '../types';
-import { assistantService } from '../services/AssistantService';
+import { apiService } from '../services/ApiService';
 
 export const useConversation = (conversationId: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -12,7 +12,7 @@ export const useConversation = (conversationId: string) => {
       setIsLoading(true);
       setError(null);
       try {
-        const history = await assistantService.getConversationHistory(conversationId);
+        const history = await apiService.getConversationHistory(conversationId);
         setMessages(history);
       } catch (err) {
         setError('Failed to load conversation history');
@@ -37,7 +37,7 @@ export const useConversation = (conversationId: string) => {
     setMessages(prevMessages => [...prevMessages, newMessage]);
 
     try {
-      await assistantService.sendMessage(conversationId, newMessage);
+      await apiService.sendMessage(conversationId, newMessage);
     } catch (err) {
       setError('Failed to save message');
       console.error(err);
