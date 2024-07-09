@@ -1,4 +1,5 @@
-import './MessageList.css';
+// src/components/MessageList.tsx
+
 import React, { useEffect, useRef } from 'react';
 import { Message } from '../types';
 
@@ -22,7 +23,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
           key={message.id}
           className={`message ${message.sender === 'user' ? 'user-message' : 'assistant-message'}`}
         >
-          <div className="message-content">{message.text}</div>
+          <div className="message-content">{message.content}</div>
           <div className="message-timestamp">
             {message.timestamp.toLocaleTimeString()}
           </div>
