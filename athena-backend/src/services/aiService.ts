@@ -1,29 +1,45 @@
 // src/services/aiService.ts
 
-import { Configuration, OpenAIApi } from 'openai';
-import dotenv from 'dotenv';
+import axios from 'axios';
 
-dotenv.config();
+const OLLAMA_API_URL = 'http://localhost:11434/api';
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+interface OllamaResponse {
+  model: string;
+  created_at: string;
+  response: string;
+  done: boolean;
+}
 
-export const generateAIResponse = async (message: string): Promise<string> => {
+interface OllamaRequest {
+  model: string;
+  prompt: string;
+  stream?: boolean;
+  options?: {
+    num_predict?: number;
+    top_k?: number;
+    top_p?: number;
+    temperature?: number;
+    stop?: string[];
+  };
+}
+
+export const generateOllamaResponse = async (
+  model: string,
+  prompt: string,
+  options?: OllamaRequest['options']
+): Promise<string> => {
   try {
-    const completion = await openai.createCompletion({
-      model: "text-davinci-002",
-      prompt: `Human: ${message}\nAI:`,
-      max_tokens: 150,
-      n: 1,
-      stop: ["Human:", "AI:"],
-      temperature: 0.7,
-    });
+    const request: OllamaRequest = {
+      model,
+      prompt,
+      options,
+    };
 
-    return completion.data.choices[0].text?.trim() || "I'm sorry, I couldn't generate a response.";
+    const response = await axios.post<OllamaResponse>(`${OLLAMA_API_URL}/generate`, request);
+    return response.data.response;
   } catch (error) {
-    console.error('Error generating AI response:', error);
-    throw new Error('Failed to generate AI response');
+    console.error('Error generating Ollama response:', error);
+    throw error;
   }
 };

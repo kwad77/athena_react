@@ -1,13 +1,13 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { AssistantModel } from '../models/AssistantModel';
-import { Message } from '../types';
+import { Message } from '../types/assistant';
 
 class ApiService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -30,7 +30,6 @@ class ApiService {
       (response) => response,
       (error) => {
         if (error.response && error.response.status === 401) {
-          // Handle unauthorized access (e.g., redirect to login)
           console.error('Unauthorized access, redirecting to login');
           // Implement redirect logic here
         }

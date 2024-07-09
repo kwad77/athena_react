@@ -1,7 +1,5 @@
-// src/App.tsx
-
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AssistantProvider } from './contexts/AssistantContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -20,12 +18,12 @@ const App: React.FC = () => {
           <div className="main-content">
             <Sidebar />
             <main>
-              <Switch>
-                <Route exact path="/" component={AssistantSelection} />
-                <Route path="/chat/:assistantId" component={AssistantChat} />
-                <Route path="/settings" component={Settings} />
-                <Route component={NotFound} />
-              </Switch>
+              <Routes>
+                <Route path="/" element={<AssistantSelection />} />
+                <Route path="/chat/:assistantId" element={<AssistantChat />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </main>
           </div>
         </div>

@@ -14,6 +14,11 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Add this new root route
+app.get('/', (req, res) => {
+  res.send('Athena Backend is running');
+});
+
 app.use('/api/chat', chatRouter);
 app.use('/api/assistants', assistantsRouter);
 

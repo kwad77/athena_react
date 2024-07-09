@@ -1,77 +1,52 @@
-import { useContext } from 'react';
-import { AssistantContext } from '../contexts/AssistantContext';
-import { Message } from '../types';
+import { useState } from 'react';
 import { sendMessageToAI, loadAssistantConfig } from '../services/aiService';
+import { Assistant, Message } from '../types';
 
 export const useAssistant = () => {
-  const context = useContext(AssistantContext);
+  const [assistantConfig, setAssistantConfig] = useState<Assistant | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!context) {
-    throw new Error('useAssistant must be used within an AssistantProvider');
-  }
-
-  const { state, dispatch } = context;
-
-  const sendMessage = async (content: string): Promise<void> => {
+  const sendMessage = async (content: string): Promise<string> => {
+    setIsLoading(true);
+    setError(null);
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      dispatch({ type: 'SET_ERROR', payload: null });
-
-      // Add user message to the state
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        content,
-        sender: 'user',
-        timestamp: new Date(),
-      };
-      dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
-
-      // Send message to AI and get response
-      const aiResponse = await sendMessageToAI(content);
-
-      // Add AI response to the state
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: aiResponse,
-        sender: 'assistant',
-        timestamp: new Date(),
-      };
-      dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });
+      const response = await sendMessageToAI(content);
+      return response;
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to send message to AI' });
+      console.error('Error sending message to AI:', error);
+      setError('Failed to send message to AI');
+      throw error;
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      setIsLoading(false);
     }
   };
 
   const loadAssistant = async (assistantId: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      dispatch({ type: 'SET_ERROR', payload: null });
-
-      const assistantConfig = await loadAssistantConfig(assistantId);
-      dispatch({ type: 'SET_ASSISTANT_CONFIG', payload: assistantConfig });
-
-      // You might want to load previous messages here as well
-      // const previousMessages = await loadPreviousMessages(assistantId);
-      // dispatch({ type: 'SET_MESSAGES', payload: previousMessages });
-
+      const config = await loadAssistantConfig(assistantId);
+      setAssistantConfig(config);
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load assistant configuration' });
+      console.error('Error loading assistant configuration:', error);
+      setError('Failed to load assistant configuration');
+      throw error;
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      setIsLoading(false);
     }
   };
 
   const clearConversation = () => {
-    dispatch({ type: 'CLEAR_MESSAGES' });
+    // This function would be implemented if we were managing conversation state here
+    // For now, it's just a placeholder
+    console.log('Clearing conversation');
   };
 
   return {
-    messages: state.messages,
-    assistantConfig: state.assistantConfig,
-    isLoading: state.isLoading,
-    error: state.error,
+    assistantConfig,
+    isLoading,
+    error,
     sendMessage,
     loadAssistant,
     clearConversation,

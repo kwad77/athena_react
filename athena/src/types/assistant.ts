@@ -1,4 +1,13 @@
 // Basic assistant information
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'assistant';
+  timestamp: Date;
+  conversationId: string;
+}
+
 export interface AssistantInfo {
     id: string;
     name: string;
