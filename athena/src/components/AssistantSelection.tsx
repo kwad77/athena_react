@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { Assistant } from '../types/assistant';
-import { fetchAvailableAssistants } from '../services/AssistantService';
+import { assistantService} from '../services/AssistantService';
 
 const AssistantSelection: React.FC = () => {
   const [assistants, setAssistants] = useState<Assistant[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const assistants = await fetchAvailableAssistants();
+      const assistants = await assistantService.getAssistants();
       setAssistants(assistants);
     };
 
