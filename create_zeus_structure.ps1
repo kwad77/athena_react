@@ -1,7 +1,7 @@
 # PowerShell Script to Create Zeus (Builder) Project Structure
 
 # Set the root directory for the Zeus project
-$rootDir = "G:\Athena_react\zeus"
+$rootDir = "your\directory\zeus"
 
 # Create root directory
 New-Item -ItemType Directory -Force -Path $rootDir

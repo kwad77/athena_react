@@ -1,7 +1,7 @@
 # PowerShell Script to Create Athena (Assistant) Project Structure
 
 # Set the root directory for the Athena project
-$rootDir = "G:\Athena_react\athena"
+$rootDir = "your\directory\athena"
 
 # Create root directory
 New-Item -ItemType Directory -Force -Path $rootDir
