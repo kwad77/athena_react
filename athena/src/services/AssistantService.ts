@@ -1,30 +1,87 @@
 import { apiService } from './ApiService';
 import { AssistantModel } from '../models/AssistantModel';
-import { Message } from '../types';
+import { Message, Assistant, Capability, CreateAssistantPayload, UpdateAssistantPayload, AssistantConfig } from '../types/assistant';
 
 class AssistantService {
-  private assistants: AssistantModel[] = [];
+  private assistants: Assistant[] = [];
 
-  async getAssistants(): Promise<AssistantModel[]> {
+  async getAssistants(): Promise<Assistant[]> {
     if (this.assistants.length === 0) {
-      this.assistants = await apiService.getAssistants();
+      const assistantModels = await apiService.getAssistants();
+      this.assistants = assistantModels.map(model => this.convertToAssistant(model));
     }
     return this.assistants;
   }
 
-  async getAssistantById(id: string): Promise<AssistantModel | undefined> {
-    const assistants = await this.getAssistants();
-    return assistants.find(assistant => assistant.id === id);
+  async getAssistantById(id: string): Promise<Assistant | undefined> {
+    if (this.assistants.length === 0) {
+      await this.getAssistants();
+    }
+    return this.assistants.find(assistant => assistant.id === id);
   }
 
-  async createAssistant(config: AssistantModel): Promise<AssistantModel> {
-    const newAssistant = await apiService.createAssistant(config);
+  private convertToAssistant(model: AssistantModel): Assistant {
+    return {
+      id: model.id,
+      name: model.name,
+      description: model.description,
+      capabilities: model.capabilities as Capability[],
+      config: {
+        model: model.model,
+        temperature: model.parameters.temperature,
+        maxTokens: model.parameters.maxTokens,
+        topP: model.parameters.topP,
+        frequencyPenalty: model.parameters.frequencyPenalty,
+        presencePenalty: model.parameters.presencePenalty,
+      },
+      isActive: model.parameters.isActive,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    };
+  }
+
+  private convertToAssistantModel(assistant: Assistant): AssistantModel {
+    return new AssistantModel({
+      name: assistant.name,
+      description: assistant.description,
+      model: assistant.config.model,
+      capabilities: assistant.capabilities,
+      parameters: {
+        temperature: assistant.config.temperature,
+        maxTokens: assistant.config.maxTokens,
+        topP: assistant.config.topP,
+        frequencyPenalty: assistant.config.frequencyPenalty,
+        presencePenalty: assistant.config.presencePenalty,
+        isActive: assistant.isActive,
+      },
+    });
+  }
+
+  async createAssistant(config: CreateAssistantPayload): Promise<Assistant> {
+    const newAssistantModel = new AssistantModel({
+      name: config.name,
+      description: config.description,
+      model: config.config.model,
+      capabilities: config.capabilities,
+      parameters: {
+        temperature: config.config.temperature,
+        maxTokens: config.config.maxTokens,
+        topP: config.config.topP,
+        frequencyPenalty: config.config.frequencyPenalty,
+        presencePenalty: config.config.presencePenalty,
+        isActive: config.isActive,
+      }
+    });
+    const createdAssistantModel = await apiService.createAssistant(newAssistantModel);
+    const newAssistant = this.convertToAssistant(createdAssistantModel);
     this.assistants.push(newAssistant);
     return newAssistant;
   }
 
-  async updateAssistant(assistant: AssistantModel): Promise<AssistantModel> {
-    const updatedAssistant = await apiService.updateAssistant(assistant);
+  async updateAssistant(assistant: UpdateAssistantPayload): Promise<Assistant> {
+    const assistantModel = this.convertToAssistantModel(assistant as Assistant);
+    const updatedAssistantModel = await apiService.updateAssistant(assistantModel);
+    const updatedAssistant = this.convertToAssistant(updatedAssistantModel);
     const index = this.assistants.findIndex(a => a.id === updatedAssistant.id);
     if (index !== -1) {
       this.assistants[index] = updatedAssistant;
@@ -53,7 +110,7 @@ class AssistantService {
     return await apiService.generateResponse(assistantId, message);
   }
 
-  async interactWithAssistant(assistantId: string, message: string): Promise<{ userMessage: Message, assistantMessage: Message }> {
+  async interactWithAssistant(assistantId: string, message: string, conversationId: string): Promise<{ userMessage: Message, assistantMessage: Message }> {
     const assistant = await this.getAssistantById(assistantId);
     if (!assistant) {
       throw new Error('Assistant not found');
@@ -63,7 +120,8 @@ class AssistantService {
       id: Date.now().toString(),
       content: message,
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
+      conversationId: conversationId
     };
 
     const responseContent = await this.generateResponse(assistantId, message);
@@ -72,7 +130,8 @@ class AssistantService {
       id: (Date.now() + 1).toString(),
       content: responseContent,
       sender: 'assistant',
-      timestamp: new Date()
+      timestamp: new Date(),
+      conversationId: conversationId
     };
 
     return { userMessage, assistantMessage };
@@ -84,3 +143,7 @@ class AssistantService {
 }
 
 export const assistantService = new AssistantService();
+
+export const fetchAvailableAssistants = async (): Promise<Assistant[]> => {
+  return assistantService.getAssistants();
+};

@@ -1,14 +1,14 @@
 // src/routes/chat.ts
 
 import express from 'express';
-import { generateAIResponse } from '../services/aiService';
+import { generateOllamaResponse } from '../services/aiService';
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { message } = req.body;
-    const response = await generateAIResponse(message);
+    const { message, model = 'llama3' } = req.body; // Default to llama2 if no model specified
+    const response = await generateOllamaResponse(model, message);
     res.json({ response });
   } catch (error) {
     console.error('Error in chat route:', error);

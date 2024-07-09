@@ -9,7 +9,7 @@ export interface AssistantConfig {
 }
 
 export class AssistantModel {
-  readonly id: string;
+  id: string;
   name: string;
   description: string;
   model: string;
